@@ -102,6 +102,116 @@ From Winbox, navigate to **Tools → Ping** and test pinging `8.8.8.8` to confir
 
 ---
 
+## Installing Proxmox VE on 2018 Intel Mac Mini Nodes
+
+The 2018 Intel Mac Mini requires extra firmware steps before Proxmox can boot from USB. Apple's Startup Security Utility blocks unsigned operating systems by default.
+
+### Step 1 — Enter Recovery Mode
+
+1. Shut the Mac Mini down completely.
+2. Hold **⌘ + R** immediately after pressing the power button and keep holding until you see the Apple logo or spinning globe.
+   - If the Mac is connected to a Windows keyboard, use **Win + R** instead.
+3. **If the timing is too tight**, boot normally, open Terminal, and run:
+   ```bash
+   sudo nvram "recovery-boot-mode=unused"
+   sudo reboot
+   ```
+   The Mac will restart directly into Recovery Mode.
+
+### Step 2 — Disable Startup Security
+
+Once in Recovery Mode:
+
+1. Open **Utilities → Startup Security Utility** from the menu bar.
+2. Authenticate with your Mac admin password when prompted.
+3. Under **Secure Boot**, select **No Security**.
+4. Under **External Boot**, select **Allow booting from external or removable media**.
+5. Close the utility and reboot.
+
+> **Why this is needed:** Apple's firmware enforces a chain-of-trust that requires a signed bootloader. Proxmox VE uses an unsigned EFI binary, so Secure Boot must be disabled.
+
+### Step 3 — Boot from Proxmox USB
+
+1. Insert your Proxmox VE USB installer.
+2. Power on the Mac Mini and hold **Option (⌥)** to open the boot picker.
+3. Select the **EFI Boot** entry for the USB drive.
+
+> **If the USB does not appear in the boot picker**, use the `bless` command to force it (see Step 3a below).
+
+#### Step 3a — Force USB Boot with `bless` (if needed)
+
+```bash
+# 1. Find the USB disk identifier
+diskutil list
+# Look for your USB (e.g., /dev/disk2)
+
+# 2. Mount the EFI partition
+diskutil mount /dev/disk2s1
+
+# 3. Set the Proxmox EFI binary as the boot target
+sudo bless \
+  --mount /Volumes/EFI \
+  --setBoot \
+  --file /Volumes/EFI/EFI/BOOT/BOOTX64.EFI \
+  --shortform
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--mount` | Points to the mounted EFI partition |
+| `--setBoot` | Sets this entry as the next boot target in NVRAM |
+| `--file` | Path to the EFI binary to boot |
+| `--shortform` | Uses the shortened device path for wider firmware compatibility |
+
+Reboot after running the command — the Mac will boot directly into the Proxmox installer.
+
+### Step 4 — Install Proxmox VE
+
+Work through the Proxmox VE installer:
+
+1. **Target disk** — select the internal SSD (the Mac Mini's NVMe drive will appear here).
+2. **Location and timezone** — set as appropriate.
+3. **Password and email** — set a strong root password; the email is used for alerts.
+4. **Network configuration** — assign a static IP on the `192.168.88.x` subnet:
+
+   | Field | Example value |
+   |-------|--------------|
+   | Management interface | `enp0s31f6` (or whatever NIC appears) |
+   | Hostname (FQDN) | `pve1.local` / `pve2.local` / `pve3.local` |
+   | IP address | `192.168.88.10` / `.11` / `.12` |
+   | Netmask | `255.255.255.0` |
+   | Gateway | `192.168.88.1` |
+   | DNS server | `192.168.88.1` |
+
+5. Confirm and let the installer complete. The node will reboot.
+
+### Step 5 — Access the Proxmox Web UI
+
+After reboot, open a browser on any device connected to the `192.168.88.x` network:
+
+```
+https://<node-ip>:8006
+```
+
+For example: `https://192.168.88.10:8006`
+
+- Accept the self-signed certificate warning.
+- Log in as `root` with the password you set during installation.
+
+> The `192.168.88.x` addresses are private (RFC 1918) and only reachable from inside your home network — they are safe to document here.
+
+### Node Verification Checklist
+
+- [ ] All three Mac Minis boot into Proxmox VE without errors
+- [ ] Each node has its correct static IP (`192.168.88.10`, `.11`, `.12`)
+- [ ] Each node can ping the gateway: `ping 192.168.88.1`
+- [ ] Each node can ping the internet: `ping 8.8.8.8`
+- [ ] Proxmox web UI is reachable at `https://<node-ip>:8006` for each node
+- [ ] Root login works on all three nodes
+- [ ] All three nodes appear under **Datacenter** in the Proxmox web UI (after clustering — Phase 3)
+
+---
+
 ## Screenshots to Take
 
 See `screenshots/README.md` for the full list of required screenshots and the order to capture them.
