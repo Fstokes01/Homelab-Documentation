@@ -177,7 +177,7 @@ Work through the Proxmox VE installer:
    | Field | Example value |
    |-------|--------------|
    | Management interface | `enp0s31f6` (or whatever NIC appears) |
-   | Hostname (FQDN) | `pve1.local` / `pve2.local` / `pve3.local` |
+   | Hostname (FQDN) | `node1.homelab.local` / `node2.homelab.local` / `node3.homelab.local` |
    | IP address | `192.168.88.10` / `.11` / `.12` |
    | Netmask | `255.255.255.0` |
    | Gateway | `192.168.88.1` |
