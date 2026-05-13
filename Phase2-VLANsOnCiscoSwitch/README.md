@@ -101,10 +101,10 @@ Verified all lab devices can:
 
 | Device | Switch Port | VLAN | IP Address | Gateway | Status |
 |--------|-------------|------|------------|---------|--------|
-| Management PC | Fa0/2 | 10 | 192.168.88.xx | 192.168.88.1 | Online |
-| Proxmox Node 1 | Fa0/3 | 10 | 192.168.88.xx | 192.168.88.1 | Online |
-| Proxmox Node 2 | Fa0/4 | 10 | 192.168.88.xx | 192.168.88.1 | Online |
-| Proxmox Node 3 | Fa0/5 | 10 | 192.168.88.xx | 192.168.88.1 | Online |
+| Management PC | Fa0/2 | 10 | 192.168.88.20 | 192.168.88.1 | Online |
+| Proxmox Node 1 | Fa0/3 | 10 | 192.168.88.10 | 192.168.88.1 | Online |
+| Proxmox Node 2 | Fa0/4 | 10 | 192.168.88.11 | 192.168.88.1 | Online |
+| Proxmox Node 3 | Fa0/5 | 10 | 192.168.88.12 | 192.168.88.1 | Online |
 | Cisco Switch (mgmt) | VLAN 10 SVI | 10 | 192.168.88.2 | 192.168.88.1 | Online |
 | MikroTik Router | Fa0/1 (trunk) | ALL* | 192.168.88.1 (VLAN 10) | - | Online |
 
